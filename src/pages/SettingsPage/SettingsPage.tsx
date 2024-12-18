@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSettings } from '../../context/SettingsContext';
 import styles from './SettingsPage.module.css';
 
 const SettingsPage: React.FC = () => {
+  const [newAudience, setNewAudience] = useState('');
+  const [showCustomInput, setShowCustomInput] = useState(false);
   const {
     difficulty,
     setDifficulty,
@@ -15,6 +17,15 @@ const SettingsPage: React.FC = () => {
     automationLevel,
     setAutomationLevel
   } = useSettings();
+
+  const handleCustomAudienceSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newAudience.trim()) {
+      setTargetAudience(newAudience.trim());
+      setNewAudience('');
+      setShowCustomInput(false);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -44,14 +55,50 @@ const SettingsPage: React.FC = () => {
 
             <div className={styles.settingsGroup}>
               <label>Zielgruppe</label>
-              <select
-                value={targetAudience}
-                onChange={(e) => setTargetAudience(e.target.value)}
-              >
-                <option value="student">Studenten</option>
-                <option value="professional">Berufstätige</option>
-                <option value="hobbyist">Hobby-Lernende</option>
-              </select>
+              {showCustomInput ? (
+                <form onSubmit={handleCustomAudienceSubmit} className={styles.customInputForm}>
+                  <input
+                    type="text"
+                    value={newAudience}
+                    onChange={(e) => setNewAudience(e.target.value)}
+                    placeholder="Neue Zielgruppe eingeben"
+                    className={styles.customInput}
+                  />
+                  <div className={styles.customInputButtons}>
+                    <button type="submit" className={styles.saveButton}>
+                      Speichern
+                    </button>
+                    <button 
+                      type="button" 
+                      className={styles.cancelButton}
+                      onClick={() => setShowCustomInput(false)}
+                    >
+                      Abbrechen
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className={styles.audienceSelector}>
+                  <select
+                    value={targetAudience}
+                    onChange={(e) => setTargetAudience(e.target.value)}
+                  >
+                    <option value="student">Studenten</option>
+                    <option value="professional">Berufstätige</option>
+                    <option value="hobbyist">Hobby-Lernende</option>
+                    {!['student', 'professional', 'hobbyist'].includes(targetAudience) && (
+                      <option value={targetAudience}>{targetAudience}</option>
+                    )}
+                  </select>
+                  <button 
+                    className={styles.addCustomButton}
+                    onClick={() => setShowCustomInput(true)}
+                    title="Neue Zielgruppe hinzufügen"
+                  >
+                    +
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className={styles.settingsGroup}>
