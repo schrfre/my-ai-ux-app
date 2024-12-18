@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ContentCard.module.css';
 import { marked } from 'marked';
+import { LearningPlan } from '../../types/LearningPlan';
+import { useSettings } from '../../context/SettingsContext';
 
 interface ContentCardProps {
   content: string;
@@ -11,6 +13,13 @@ interface ContentCardProps {
 const ContentCard: React.FC<ContentCardProps> = ({ content, confidenceScore, topic }) => {
   const [htmlContent, setHtmlContent] = useState('');
 
+  const {
+    difficulty,
+    targetAudience,
+    automationLevel,
+    language
+  } = useSettings();
+
   useEffect(() => {
     const parseMarkdown = async () => {
       const parsed = await marked(content);
@@ -18,6 +27,29 @@ const ContentCard: React.FC<ContentCardProps> = ({ content, confidenceScore, top
     };
     parseMarkdown();
   }, [content]);
+
+  const handleSave = () => {
+    const newPlan: LearningPlan = {
+      id: Date.now().toString(),
+      topic,
+      content,
+      confidenceScore,
+      createdAt: new Date(),
+      settings: {
+        difficulty,
+        targetAudience,
+        automationLevel,
+        language
+      }
+    };
+
+    const savedPlans = localStorage.getItem('learningPlans');
+    const plans: LearningPlan[] = savedPlans ? JSON.parse(savedPlans) : [];
+    plans.push(newPlan);
+    localStorage.setItem('learningPlans', JSON.stringify(plans));
+
+    alert('Lernplan erfolgreich gespeichert!');
+  };
 
   return (
     <div className={styles.card}>
@@ -50,7 +82,10 @@ const ContentCard: React.FC<ContentCardProps> = ({ content, confidenceScore, top
           <span className={styles.icon}>📋</span>
           Kopieren
         </button>
-        <button className={styles.actionButton}>
+        <button 
+          className={styles.actionButton}
+          onClick={handleSave}
+        >
           <span className={styles.icon}>💾</span>
           Speichern
         </button>

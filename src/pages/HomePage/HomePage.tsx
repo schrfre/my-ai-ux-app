@@ -10,9 +10,8 @@ const HomePage: React.FC = () => {
   const [confidenceScore, setConfidenceScore] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
   const abortControllerRef = useRef<AbortController | null>(null);
-
+  
   const {
     difficulty,
     targetAudience,
@@ -27,7 +26,6 @@ const HomePage: React.FC = () => {
     setIsLoading(true);
     setError(null);
 
-    // Neuen AbortController erstellen
     abortControllerRef.current = new AbortController();
 
     try {
@@ -63,53 +61,89 @@ const HomePage: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <h1>Willkommen</h1>
-      
-      <div className={styles.inputSection}>
-        <div className={styles.inputGroup}>
-          <label htmlFor="topic">Thema:</label>
-          <input
-            id="topic"
-            type="text"
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            placeholder="z.B. React Hooks, TypeScript Basics..."
-          />
-        </div>
-
-        <div className={styles.buttonGroup}>
-          <button 
-            className={styles.generateButton}
-            onClick={handleGenerate}
-            disabled={!topic || isLoading}
-          >
-            {isLoading ? 'Generiere...' : 'Inhalt generieren'}
-          </button>
-
-          {isLoading && (
-            <button 
-              className={styles.abortButton}
-              onClick={handleAbort}
-            >
-              Abbrechen
-            </button>
-          )}
-        </div>
+      <div className={styles.hero}>
+        <h1>KI-gestützte Lernplan-Generierung</h1>
+        <p>Erstellen Sie personalisierte Lernpläne mit Hilfe künstlicher Intelligenz</p>
       </div>
 
-      {error && (
-        <div className={styles.error}>
-          {error}
-        </div>
-      )}
+      <div className={styles.mainSection}>
+        <div className={styles.inputSection}>
+          <div className={styles.inputWrapper}>
+            <input
+              type="text"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="Geben Sie ein Thema ein, z.B. 'React Hooks' oder 'Machine Learning Grundlagen'"
+              className={styles.topicInput}
+            />
+            <div className={styles.buttonContainer}>
+              <button 
+                className={styles.generateButton}
+                onClick={handleGenerate}
+                disabled={!topic || isLoading}
+              >
+                {isLoading ? (
+                  <div className={styles.loadingSpinner}>
+                    <div className={styles.spinner}></div>
+                    <span>Generiere...</span>
+                  </div>
+                ) : (
+                  <>
+                    <span className={styles.buttonIcon}>🤖</span>
+                    Lernplan erstellen
+                  </>
+                )}
+              </button>
+              {isLoading && (
+                <button 
+                  className={styles.abortButton}
+                  onClick={handleAbort}
+                  title="Generation abbrechen"
+                >
+                  <span className={styles.buttonIcon}>⏹</span>
+                  <span>Abbrechen</span>
+                </button>
+              )}
+            </div>
+          </div>
 
-      {generatedContent && (
-        <ContentCard
-          content={generatedContent}
-          confidenceScore={confidenceScore}
-          topic={topic}
-        />
-      )}
+          <div className={styles.features}>
+            <div className={styles.feature}>
+              <span className={styles.featureIcon}>🎯</span>
+              <p>Personalisierte Lernziele</p>
+            </div>
+            <div className={styles.feature}>
+              <span className={styles.featureIcon}>📚</span>
+              <p>Strukturierte Inhalte</p>
+            </div>
+            <div className={styles.feature}>
+              <span className={styles.featureIcon}>⚡</span>
+              <p>Effizientes Lernen</p>
+            </div>
+            <div className={styles.feature}>
+              <span className={styles.featureIcon}>🔄</span>
+              <p>Anpassbare Pläne</p>
+            </div>
+          </div>
+        </div>
+
+        {error && (
+          <div className={styles.error}>
+            <span className={styles.errorIcon}>⚠️</span>
+            {error}
+          </div>
+        )}
+
+        {generatedContent && (
+          <div className={styles.resultSection}>
+            <ContentCard
+              content={generatedContent}
+              confidenceScore={confidenceScore}
+              topic={topic}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

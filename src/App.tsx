@@ -7,6 +7,7 @@ import ExplainabilityPage from './pages/ExplainabilityPage/ExplainabilityPage';
 import SettingsPage from './pages/SettingsPage/SettingsPage';
 import { SettingsProvider } from './context/SettingsContext';
 import styles from './App.module.css';
+import LearningPlansPage from './pages/LearningPlansPage/LearningPlansPage';
 
 const App: React.FC = () => {
   return (
@@ -17,6 +18,7 @@ const App: React.FC = () => {
           <main className={styles.mainContent}>
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/learning-plans" element={<LearningPlansPage />} />
               <Route path="/feedback" element={<FeedbackPage />} />
               <Route path="/explainability" element={<ExplainabilityPage />} />
               <Route path="/settings" element={<SettingsPage />} />

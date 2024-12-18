@@ -1,156 +1,237 @@
 .container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+}
+
+.hero {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, #00c6fb 0%, #005bea 100%);
+  color: white;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.mainSection {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem 2rem;
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.settingsCard {
+  background: white;
   padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.cardIcon {
+  font-size: 2rem;
+}
+
+.cardHeader h2 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
 }
 
 .settingsGroup {
-  max-width: 600px;
-  margin-top: 2rem;
-}
-
-.settingsGroup h2 {
-  margin-bottom: 1.5rem;
-  color: #333;
-}
-
-.settingsGroup h3 {
-  margin: 1rem 0;
-  color: #444;
-}
-
-.inputGroup {
   margin-bottom: 1.5rem;
 }
 
-.inputGroup label {
+.settingsGroup label {
   display: block;
   margin-bottom: 0.5rem;
-  font-weight: 500;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
-.inputGroup input,
-.inputGroup select {
+.settingsGroup select {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 0.75rem;
+  border: 2px solid #e4e9f2;
+  border-radius: 8px;
   font-size: 1rem;
+  transition: all 0.3s ease;
 }
 
-.inputGroup input:focus,
-.inputGroup select:focus {
+.settingsGroup select:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+  border-color: #00c6fb;
+  box-shadow: 0 0 0 3px rgba(0,198,251,0.2);
 }
 
 .checkboxGroup {
-  margin: 1.5rem 0;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.checkboxGroup label {
+.checkbox {
   display: flex;
   align-items: center;
-  margin: 0.5rem 0;
+  gap: 0.5rem;
   cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding-left: 35px;
+  color: #2c3e50;
 }
 
-.checkboxGroup input[type="checkbox"] {
-  margin-right: 0.5rem;
-  width: 16px;
-  height: 16px;
+.checkbox input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
 }
 
-.sliderContainer {
-  margin-top: 2rem;
+.checkmark {
+  position: absolute;
+  left: 0;
+  height: 24px;
+  width: 24px;
+  background-color: #e4e9f2;
+  border-radius: 6px;
+  transition: all 0.3s ease;
 }
 
-.sliderContainer label {
+.checkbox:hover input ~ .checkmark {
+  background-color: #d1d9e6;
+}
+
+.checkbox input:checked ~ .checkmark {
+  background-color: #00c6fb;
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.checkbox input:checked ~ .checkmark:after {
   display: block;
-  margin-bottom: 1rem;
-  font-weight: 500;
+}
+
+.checkbox .checkmark:after {
+  left: 9px;
+  top: 5px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 .slider {
+  -webkit-appearance: none;
   width: 100%;
   height: 8px;
-  -webkit-appearance: none;
-  background: #ddd;
   border-radius: 4px;
+  background: #e4e9f2;
   outline: none;
+  margin: 1rem 0;
 }
 
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
-  background: #007bff;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
+  background: #00c6fb;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  background: #007bff;
-  border-radius: 50%;
-  cursor: pointer;
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(0,198,251,0.3);
 }
 
 .sliderLabels {
   display: flex;
   justify-content: space-between;
-  margin-top: 0.5rem;
   color: #666;
   font-size: 0.9rem;
+  margin-top: 0.5rem;
 }
 
-.saveSection {
+.infoSection {
   margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #eee;
 }
 
-.saveButton {
-  background: #28a745;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  min-width: 200px;
+.infoCard {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-.saveButton:hover {
-  background: #218838;
+.infoIcon {
+  font-size: 2rem;
 }
 
-.saveButton:disabled {
-  background: #6c757d;
-  cursor: not-allowed;
+.infoCard h3 {
+  color: #2c3e50;
+  margin: 0 0 0.5rem 0;
 }
 
-.successMessage {
-  margin-top: 1rem;
-  padding: 0.75rem;
-  background: #d4edda;
-  color: #155724;
-  border-radius: 4px;
-  animation: fadeIn 0.3s ease-in;
+.infoCard p {
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 2rem;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .mainSection {
+    padding: 0 1rem 1rem;
+  }
+
+  .settingsCard {
+    padding: 1.5rem;
+  }
+
+  .cardHeader {
+    margin-bottom: 1.5rem;
+  }
+
+  .cardHeader h2 {
+    font-size: 1.3rem;
   }
 } 

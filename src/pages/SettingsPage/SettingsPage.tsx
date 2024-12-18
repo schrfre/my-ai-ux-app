@@ -1,175 +1,167 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from './SettingsPage.module.css';
+import React from 'react';
 import { useSettings } from '../../context/SettingsContext';
-import { StylePreference } from '../../context/SettingsContext';
+import styles from './SettingsPage.module.css';
 
 const SettingsPage: React.FC = () => {
-  const navigate = useNavigate();
   const {
-    difficulty, setDifficulty,
-    targetAudience, setTargetAudience,
-    stylePreferences, setStylePreferences,
-    language, setLanguage,
-    automationLevel, setAutomationLevel
+    difficulty,
+    setDifficulty,
+    targetAudience,
+    setTargetAudience,
+    stylePreferences,
+    setStylePreferences,
+    language,
+    setLanguage,
+    automationLevel,
+    setAutomationLevel
   } = useSettings();
-
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
-
-  const handleSaveSettings = async () => {
-    setIsSaving(true);
-    setSaveSuccess(false);
-
-    try {
-      // Hier später: Backend-Speicherung implementieren
-      // Aktuell nur lokale Simulation
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Speichere in localStorage für Persistenz
-      const settings = {
-        difficulty,
-        targetAudience,
-        stylePreferences,
-        language,
-        automationLevel
-      };
-      localStorage.setItem('aiuxSettings', JSON.stringify(settings));
-      
-      setSaveSuccess(true);
-      setTimeout(() => {
-        setSaveSuccess(false);
-        navigate('/'); // Optional: Zurück zur Homepage
-      }, 1500);
-    } catch (error) {
-      console.error('Fehler beim Speichern:', error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   return (
     <div className={styles.container}>
-      <h1>Einstellungen</h1>
-      
-      <div className={styles.settingsGroup}>
-        <h2>Persönliche Präferenzen</h2>
-        
-        <div className={styles.inputGroup}>
-          <label htmlFor="difficulty">Standard-Schwierigkeitsgrad:</label>
-          <select
-            id="difficulty"
-            value={difficulty}
-            onChange={(e) => setDifficulty(e.target.value)}
-          >
-            <option value="beginner">Anfänger</option>
-            <option value="medium">Fortgeschritten</option>
-            <option value="expert">Experte</option>
-          </select>
-        </div>
+      <div className={styles.hero}>
+        <h1>Einstellungen</h1>
+        <p>Passen Sie die KI-Generierung an Ihre Bedürfnisse an</p>
+      </div>
 
-        <div className={styles.inputGroup}>
-          <label htmlFor="targetAudience">Standard-Zielgruppe:</label>
-          <input
-            id="targetAudience"
-            type="text"
-            value={targetAudience}
-            onChange={(e) => setTargetAudience(e.target.value)}
-            placeholder="z.B. Entwickler, Studenten..."
-          />
-        </div>
+      <div className={styles.mainSection}>
+        <div className={styles.settingsGrid}>
+          <div className={styles.settingsCard}>
+            <div className={styles.cardHeader}>
+              <span className={styles.cardIcon}>📚</span>
+              <h2>Lernplan-Einstellungen</h2>
+            </div>
+            <div className={styles.settingsGroup}>
+              <label>Schwierigkeitsgrad</label>
+              <select
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value)}
+              >
+                <option value="beginner">Anfänger</option>
+                <option value="intermediate">Fortgeschritten</option>
+                <option value="expert">Experte</option>
+              </select>
+            </div>
 
-        <div className={styles.inputGroup}>
-          <label htmlFor="language">Bevorzugte Sprache:</label>
-          <select
-            id="language"
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-          >
-            <option value="deutsch">Deutsch</option>
-            <option value="english">English</option>
-          </select>
-        </div>
+            <div className={styles.settingsGroup}>
+              <label>Zielgruppe</label>
+              <select
+                value={targetAudience}
+                onChange={(e) => setTargetAudience(e.target.value)}
+              >
+                <option value="student">Studenten</option>
+                <option value="professional">Berufstätige</option>
+                <option value="hobbyist">Hobby-Lernende</option>
+              </select>
+            </div>
 
-        <div className={styles.checkboxGroup}>
-          <h3>Stilvorlieben</h3>
-          <label>
-            <input
-              type="checkbox"
-              checked={stylePreferences.formal}
-              onChange={() => setStylePreferences((prev: StylePreference) => ({
-                ...prev,
-                formal: !prev.formal
-              }))}
-            />
-            Formaler Schreibstil
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={stylePreferences.technical}
-              onChange={() => setStylePreferences((prev: StylePreference) => ({
-                ...prev,
-                technical: !prev.technical
-              }))}
-            />
-            Technische Details bevorzugt
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={stylePreferences.examples}
-              onChange={() => setStylePreferences((prev: StylePreference) => ({
-                ...prev,
-                examples: !prev.examples
-              }))}
-            />
-            Mit Codebeispielen
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={stylePreferences.detailed}
-              onChange={() => setStylePreferences((prev: StylePreference) => ({
-                ...prev,
-                detailed: !prev.detailed
-              }))}
-            />
-            Ausführliche Erklärungen
-          </label>
-        </div>
+            <div className={styles.settingsGroup}>
+              <label>Sprache</label>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+              >
+                <option value="de">Deutsch</option>
+                <option value="en">Englisch</option>
+              </select>
+            </div>
+          </div>
 
-        <div className={styles.sliderContainer}>
-          <label htmlFor="automation">Automatisierungsgrad: {automationLevel}%</label>
-          <input
-            id="automation"
-            type="range"
-            min="0"
-            max="100"
-            value={automationLevel}
-            onChange={(e) => setAutomationLevel(Number(e.target.value))}
-            className={styles.slider}
-          />
-          <div className={styles.sliderLabels}>
-            <span>Manuell</span>
-            <span>Voll automatisch</span>
+          <div className={styles.settingsCard}>
+            <div className={styles.cardHeader}>
+              <span className={styles.cardIcon}>🎨</span>
+              <h2>Stil-Präferenzen</h2>
+            </div>
+            <div className={styles.checkboxGroup}>
+              <label className={styles.checkbox}>
+                <input
+                  type="checkbox"
+                  checked={stylePreferences.formal}
+                  onChange={(e) => setStylePreferences({
+                    ...stylePreferences,
+                    formal: e.target.checked
+                  })}
+                />
+                <span className={styles.checkmark}></span>
+                Formaler Stil
+              </label>
+
+              <label className={styles.checkbox}>
+                <input
+                  type="checkbox"
+                  checked={stylePreferences.technical}
+                  onChange={(e) => setStylePreferences({
+                    ...stylePreferences,
+                    technical: e.target.checked
+                  })}
+                />
+                <span className={styles.checkmark}></span>
+                Technische Details
+              </label>
+
+              <label className={styles.checkbox}>
+                <input
+                  type="checkbox"
+                  checked={stylePreferences.examples}
+                  onChange={(e) => setStylePreferences({
+                    ...stylePreferences,
+                    examples: e.target.checked
+                  })}
+                />
+                <span className={styles.checkmark}></span>
+                Beispiele einbinden
+              </label>
+
+              <label className={styles.checkbox}>
+                <input
+                  type="checkbox"
+                  checked={stylePreferences.detailed}
+                  onChange={(e) => setStylePreferences({
+                    ...stylePreferences,
+                    detailed: e.target.checked
+                  })}
+                />
+                <span className={styles.checkmark}></span>
+                Detaillierte Erklärungen
+              </label>
+            </div>
+          </div>
+
+          <div className={styles.settingsCard}>
+            <div className={styles.cardHeader}>
+              <span className={styles.cardIcon}>🤖</span>
+              <h2>KI-Steuerung</h2>
+            </div>
+            <div className={styles.settingsGroup}>
+              <label>
+                Automatisierungsgrad: {automationLevel}%
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={automationLevel}
+                onChange={(e) => setAutomationLevel(Number(e.target.value))}
+                className={styles.slider}
+              />
+              <div className={styles.sliderLabels}>
+                <span>Mehr Kontrolle</span>
+                <span>Mehr Automation</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className={styles.saveSection}>
-          <button 
-            className={styles.saveButton}
-            onClick={handleSaveSettings}
-            disabled={isSaving}
-          >
-            {isSaving ? 'Speichere...' : 'Einstellungen speichern'}
-          </button>
-          
-          {saveSuccess && (
-            <div className={styles.successMessage}>
-              ✓ Einstellungen erfolgreich gespeichert
+        <div className={styles.infoSection}>
+          <div className={styles.infoCard}>
+            <span className={styles.infoIcon}>💡</span>
+            <div>
+              <h3>Tipp</h3>
+              <p>
+                Experimentieren Sie mit verschiedenen Einstellungen, 
+                um die optimale Konfiguration für Ihre Lernziele zu finden.
+              </p>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
