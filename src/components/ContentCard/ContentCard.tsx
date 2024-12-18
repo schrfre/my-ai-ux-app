@@ -1,24 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ContentCard.module.css';
 import { marked } from 'marked';
-import { LearningPlan } from '../../types/LearningPlan';
+import { LearningPlan, StylePreferences } from '../../types/LearningPlan';
 import { useSettings } from '../../context/SettingsContext';
+import { generateId } from '../../utils/helpers';
 
 interface ContentCardProps {
   content: string;
   confidenceScore: number;
   topic: string;
+  difficulty?: string;
+  targetAudience?: string;
+  automationLevel?: number;
+  language?: string;
 }
 
-const ContentCard: React.FC<ContentCardProps> = ({ content, confidenceScore, topic }) => {
+const ContentCard: React.FC<ContentCardProps> = ({
+  topic,
+  content,
+  confidenceScore,
+  difficulty,
+  targetAudience,
+  automationLevel,
+  language
+}) => {
   const [htmlContent, setHtmlContent] = useState('');
+  const settings = useSettings();
 
-  const {
-    difficulty,
-    targetAudience,
-    automationLevel,
-    language
-  } = useSettings();
+  const effectiveDifficulty = difficulty || settings.difficulty;
+  const effectiveTargetAudience = targetAudience || settings.targetAudience;
+  const effectiveAutomationLevel = automationLevel || settings.automationLevel;
+  const effectiveLanguage = language || settings.language;
 
   useEffect(() => {
     const parseMarkdown = async () => {
@@ -29,17 +41,25 @@ const ContentCard: React.FC<ContentCardProps> = ({ content, confidenceScore, top
   }, [content]);
 
   const handleSave = () => {
+    const defaultStylePreferences: StylePreferences = {
+      formal: false,
+      technical: false,
+      examples: true,
+      detailed: true
+    };
+
     const newPlan: LearningPlan = {
-      id: Date.now().toString(),
+      id: generateId(),
       topic,
       content,
       confidenceScore,
       createdAt: new Date(),
       settings: {
-        difficulty,
-        targetAudience,
-        automationLevel,
-        language
+        difficulty: effectiveDifficulty,
+        targetAudience: effectiveTargetAudience,
+        automationLevel: effectiveAutomationLevel,
+        language: effectiveLanguage,
+        stylePreferences: defaultStylePreferences
       }
     };
 
