@@ -7,6 +7,8 @@ const LearningPlansPage: React.FC = () => {
   const [learningPlans, setLearningPlans] = useState<LearningPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<LearningPlan | null>(null);
   const [filter, setFilter] = useState('');
+  const [editingPlan, setEditingPlan] = useState<LearningPlan | null>(null);
+  const [editableContent, setEditableContent] = useState('');
 
   useEffect(() => {
     const loadLearningPlans = () => {
@@ -59,6 +61,26 @@ const LearningPlansPage: React.FC = () => {
     return labels[audience as keyof typeof labels] || audience;
   };
 
+  const handleEdit = (plan: LearningPlan, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingPlan(plan);
+    setEditableContent(plan.content);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingPlan) return;
+
+    const updatedPlans = learningPlans.map(plan => 
+      plan.id === editingPlan.id 
+        ? { ...plan, content: editableContent }
+        : plan
+    );
+
+    setLearningPlans(updatedPlans);
+    localStorage.setItem('learningPlans', JSON.stringify(updatedPlans));
+    setEditingPlan(null);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.hero}>
@@ -103,16 +125,48 @@ const LearningPlansPage: React.FC = () => {
                     <span className={styles.audience}>
                       {getAudienceLabel(plan.settings.targetAudience)}
                     </span>
-                    <button
-                      className={styles.deleteButton}
-                      onClick={(e) => handleDelete(plan.id, e)}
-                      title="Lernplan löschen"
-                    >
-                      🗑️
-                    </button>
+                    <div className={styles.planActions}>
+                      <button
+                        className={styles.editButton}
+                        onClick={(e) => handleEdit(plan, e)}
+                        title="Lernplan bearbeiten"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className={styles.deleteButton}
+                        onClick={(e) => handleDelete(plan.id, e)}
+                        title="Lernplan löschen"
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   </div>
                 </div>
-                {selectedPlan?.id === plan.id && (
+                {editingPlan?.id === plan.id ? (
+                  <div className={styles.editSection}>
+                    <textarea
+                      value={editableContent}
+                      onChange={(e) => setEditableContent(e.target.value)}
+                      className={styles.editTextarea}
+                      rows={15}
+                    />
+                    <div className={styles.editActions}>
+                      <button 
+                        className={styles.saveButton}
+                        onClick={handleSaveEdit}
+                      >
+                        Änderungen speichern
+                      </button>
+                      <button 
+                        className={styles.cancelButton}
+                        onClick={() => setEditingPlan(null)}
+                      >
+                        Abbrechen
+                      </button>
+                    </div>
+                  </div>
+                ) : selectedPlan?.id === plan.id && (
                   <div className={styles.planContent}>
                     <ContentCard
                       topic={plan.topic}

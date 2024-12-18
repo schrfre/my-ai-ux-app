@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import styles from './HomePage.module.css';
 import ContentCard from '../../components/ContentCard/ContentCard';
 import { useSettings } from '../../context/SettingsContext';
@@ -7,56 +7,39 @@ import { generateContent } from '../../services/llmService';
 const HomePage: React.FC = () => {
   const [topic, setTopic] = useState('');
   const [generatedContent, setGeneratedContent] = useState('');
+  const [editableContent, setEditableContent] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
   const [confidenceScore, setConfidenceScore] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  
-  const {
-    difficulty,
-    targetAudience,
-    stylePreferences,
-    language,
-    automationLevel
-  } = useSettings();
+  const settings = useSettings();
 
   const handleGenerate = async () => {
     if (!topic) return;
-
     setIsLoading(true);
     setError(null);
 
-    abortControllerRef.current = new AbortController();
-
     try {
-      const content = await generateContent({
-        topic,
-        difficulty,
-        targetAudience,
-        stylePreferences,
-        language,
-        automationLevel,
-        signal: abortControllerRef.current.signal
-      });
-
+      const content = await generateContent({ topic, ...settings });
       setGeneratedContent(content);
+      setEditableContent(content);
       setConfidenceScore(85);
+      setIsEditing(true); // Automatisch in den Review-Modus wechseln
     } catch (err) {
-      if ((err as Error).message === 'ABORTED') {
-        setError('Generierung abgebrochen');
-      } else {
-        setError('Fehler bei der Generierung des Lernplans');
-      }
+      setError('Fehler bei der Generierung des Lernplans');
     } finally {
       setIsLoading(false);
-      abortControllerRef.current = null;
     }
   };
 
-  const handleAbort = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
+  const handleSaveEdit = () => {
+    setGeneratedContent(editableContent);
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditableContent(generatedContent);
+    setIsEditing(false);
   };
 
   return (
@@ -94,16 +77,6 @@ const HomePage: React.FC = () => {
                   </>
                 )}
               </button>
-              {isLoading && (
-                <button 
-                  className={styles.abortButton}
-                  onClick={handleAbort}
-                  title="Generation abbrechen"
-                >
-                  <span className={styles.buttonIcon}>⏹</span>
-                  <span>Abbrechen</span>
-                </button>
-              )}
             </div>
           </div>
 
@@ -134,13 +107,57 @@ const HomePage: React.FC = () => {
           </div>
         )}
 
-        {generatedContent && (
+        {generatedContent && !isEditing && (
           <div className={styles.resultSection}>
+            <div className={styles.resultActions}>
+              <button 
+                className={styles.editButton}
+                onClick={() => setIsEditing(true)}
+              >
+                <span className={styles.buttonIcon}>✏️</span>
+                Lernplan bearbeiten
+              </button>
+            </div>
             <ContentCard
               content={generatedContent}
               confidenceScore={confidenceScore}
               topic={topic}
             />
+          </div>
+        )}
+
+        {isEditing && (
+          <div className={styles.editSection}>
+            <h3>Lernplan überprüfen und anpassen</h3>
+            <div className={styles.editContainer}>
+              <textarea
+                value={editableContent}
+                onChange={(e) => setEditableContent(e.target.value)}
+                className={styles.editTextarea}
+                rows={15}
+              />
+              <div className={styles.editInfo}>
+                <p>
+                  <span className={styles.infoIcon}>💡</span>
+                  Sie können den KI-generierten Inhalt hier anpassen. 
+                  Ihre Änderungen werden erst nach dem Speichern übernommen.
+                </p>
+              </div>
+              <div className={styles.editActions}>
+                <button 
+                  className={styles.saveButton}
+                  onClick={handleSaveEdit}
+                >
+                  Änderungen speichern
+                </button>
+                <button 
+                  className={styles.cancelButton}
+                  onClick={handleCancelEdit}
+                >
+                  Abbrechen
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
