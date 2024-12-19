@@ -1,0 +1,259 @@
+.container {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e4e9f2;
+  padding-bottom: 1rem;
+}
+
+.tab {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: none;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.tab.active {
+  color: #00c6fb;
+}
+
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1rem;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #00c6fb;
+}
+
+.overview {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 2fr 1fr;
+}
+
+.radarChart {
+  background: #f8f9fa;
+  padding: 2rem;
+  border-radius: 12px;
+  min-height: 450px;
+  min-width: 500px;
+}
+
+.radarChart h3 {
+  margin-bottom: 1.5rem;
+  color: #2c3e50;
+  text-align: center;
+  font-size: 1.2rem;
+}
+
+.summaryCards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.summaryCard {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+
+.adaptations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.adaptation {
+  background: rgba(0,198,251,0.1);
+  color: #00c6fb;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.keywordAnalysis {
+  margin-bottom: 2rem;
+}
+
+.keywords {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.keywordCard {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+
+.keywordHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.weight {
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  color: white;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.timelineItem {
+  position: relative;
+  padding-bottom: 2rem;
+  padding-left: 2rem;
+}
+
+.timelineNumber {
+  position: absolute;
+  left: -2rem;
+  width: 2rem;
+  height: 2rem;
+  background: #00c6fb;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.timelineItem::before {
+  content: '';
+  position: absolute;
+  left: -1rem;
+  top: 2rem;
+  bottom: 0;
+  width: 2px;
+  background: #e4e9f2;
+}
+
+.timelineItem:last-child::before {
+  display: none;
+}
+
+.thoughtProcess {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.thoughtStep {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.stepIcon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .overview {
+    grid-template-columns: 1fr;
+  }
+
+  .tabs {
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  .tab {
+    white-space: nowrap;
+  }
+
+  .radarChart {
+    min-height: 400px;
+    padding: 1rem;
+  }
+}
+
+.fallbackChart {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.fallbackMetric {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.fallbackLabel {
+  min-width: 120px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.fallbackBar {
+  flex: 1;
+  height: 24px;
+  background: #e4e9f2;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.fallbackProgress {
+  height: 100%;
+  background: linear-gradient(135deg, #00c6fb 0%, #005bea 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: width 0.3s ease;
+}
+
+/* Responsive Anpassungen */
+@media (max-width: 768px) {
+  .fallbackMetric {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .fallbackLabel {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 1024px) {
+  .overview {
+    grid-template-columns: 1fr;
+  }
+  
+  .radarChart {
+    min-width: unset;
+  }
+} 
