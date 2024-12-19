@@ -70,6 +70,7 @@
   transition: all 0.3s ease;
 }
 
+.links a[href="/progress"]::before { content: '📊'; }
 .links a[href="/learning-plans"]::before { content: '📚'; }
 .links a[href="/feedback"]::before { content: '💭'; }
 .links a[href="/explainability"]::before { content: '🔍'; }

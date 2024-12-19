@@ -1,0 +1,352 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+}
+
+.hero {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, #00c6fb 0%, #005bea 100%);
+  color: white;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.mainSection {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.header p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.content {
+  display: grid;
+  gap: 2rem;
+}
+
+.progressCard {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.progressHeader h2 {
+  color: #2c3e50;
+  margin: 0;
+}
+
+.lastUpdated {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.progressBar {
+  background: #f1f5f9;
+  border-radius: 8px;
+  height: 24px;
+  position: relative;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.progressFill {
+  background: linear-gradient(135deg, #00c6fb 0%, #005bea 100%);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.progressText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #2c3e50;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.feedbackSection {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.feedbackItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.feedbackItem label {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.ratingButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ratingButton {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  color: #64748b;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ratingButton:hover {
+  border-color: #00c6fb;
+  color: #00c6fb;
+}
+
+.ratingButton.active {
+  background: #00c6fb;
+  border-color: #00c6fb;
+  color: white;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.completeButton, .adjustButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+}
+
+.completeButton {
+  background: linear-gradient(135deg, #00c6fb 0%, #005bea 100%);
+  border: none;
+  color: white;
+}
+
+.completeButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 198, 251, 0.3);
+}
+
+.completeButton:disabled {
+  background: #e2e8f0;
+  cursor: not-allowed;
+}
+
+.adjustButton {
+  background: white;
+  border: 2px solid #00c6fb;
+  color: #00c6fb;
+}
+
+.adjustButton:hover {
+  background: rgba(0, 198, 251, 0.1);
+}
+
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .container {
+    padding: 0;
+  }
+
+  .mainSection {
+    padding: 0 1rem;
+  }
+
+  .progressHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+}
+
+.emptyState {
+  background: white;
+  border-radius: 16px;
+  padding: 3rem;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.5s ease-out;
+}
+
+.emptyStateIcon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  animation: bounce 2s infinite;
+}
+
+.emptyState h2 {
+  color: #2c3e50;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.emptyState p {
+  color: #64748b;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.createButton {
+  background: linear-gradient(135deg, #00c6fb 0%, #005bea 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.createButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 198, 251, 0.3);
+}
+
+.createButton span {
+  font-size: 1.4rem;
+  font-weight: 400;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Für mobile Ansicht */
+@media (max-width: 768px) {
+  .emptyState {
+    padding: 2rem 1rem;
+    margin: 1rem;
+  }
+
+  .emptyStateIcon {
+    font-size: 3rem;
+  }
+
+  .emptyState h2 {
+    font-size: 1.5rem;
+  }
+
+  .createButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.chapters {
+  margin-top: 1.5rem;
+}
+
+.chapter {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.chapterHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.chapterHeader h3 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.completeButton {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+.completeButton.completed {
+  background: #10b981;
+  color: white;
+}
+
+.chapterContent {
+  color: #4a5568;
+  line-height: 1.6;
+} 

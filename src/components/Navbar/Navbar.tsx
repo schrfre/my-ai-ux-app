@@ -25,6 +25,9 @@ const Navbar: React.FC = () => {
         <NavLink to="/" className={({ isActive }) => isActive ? styles.active : ''}>
           <span>Home</span>
         </NavLink>
+        <NavLink to="/progress" className={({ isActive }) => isActive ? styles.active : ''}>
+          <span>Fortschritt</span>
+        </NavLink>
         <NavLink to="/learning-plans" className={({ isActive }) => isActive ? styles.active : ''}>
           <span>Lernpläne</span>
         </NavLink>

@@ -28,111 +28,228 @@
 .mainSection {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem 2rem;
+  padding: 0 2rem;
 }
 
-.searchBox {
+.searchBar {
   margin-bottom: 2rem;
 }
 
-.searchBox input {
+.searchInput {
   width: 100%;
   padding: 1rem;
-  border: 2px solid #e4e9f2;
-  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  background: white;
 }
 
-.searchBox input:focus {
+.searchInput:focus {
   outline: none;
   border-color: #00c6fb;
-  box-shadow: 0 0 0 3px rgba(0,198,251,0.2);
+  box-shadow: 0 0 0 4px rgba(0,198,251,0.1);
 }
 
-.plansList {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.plansGrid {
+  display: grid;
+  gap: 1.5rem;
 }
 
-.planItem {
+.planCard {
   background: white;
   border-radius: 12px;
-  padding: 1rem 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.planItem:hover {
+.planCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.1);
 }
 
-.planItem.active {
-  border-left: 4px solid #00c6fb;
-  background: #f8f9fa;
+.planHeader {
+  margin-bottom: 1rem;
 }
 
-.planTitle {
-  font-weight: 600;
+.planHeader h2 {
   color: #2c3e50;
-  flex: 1;
+  margin: 0;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .planMeta {
   display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  color: #666;
+  justify-content: space-between;
+  color: #64748b;
   font-size: 0.9rem;
 }
 
-.date, .difficulty, .audience {
+.progressBar {
+  background: #f1f5f9;
+  border-radius: 8px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.progressFill {
+  background: linear-gradient(135deg, #00c6fb 0%, #005bea 100%);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.planDetails {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e9ecef;
+  animation: slideDown 0.3s ease-out;
+}
+
+.detailsGrid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 300px 1fr;
+}
+
+.statsSection {
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 12px;
+  height: fit-content;
+}
+
+.statsSection h3 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+}
+
+.statsGrid {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.statItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.statIcon {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border-radius: 8px;
+}
+
+.statInfo {
+  flex: 1;
+}
+
+.statInfo label {
+  display: block;
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-bottom: 0.2rem;
+}
+
+.statInfo span {
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.contentSection {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.contentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.contentHeader h3 {
+  color: #2c3e50;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.contentActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.planContent {
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 8px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.planContent pre {
+  white-space: pre-wrap;
+  font-family: inherit;
+  margin: 0;
+  color: #2c3e50;
+  line-height: 1.6;
+}
+
+.planActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.editButton, .deleteButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.date::before {
-  content: '📅';
-}
-
-.difficulty::before {
-  content: '📊';
-}
-
-.audience::before {
-  content: '👥';
+.editButton {
+  background: white;
+  border: 2px solid #00c6fb;
+  color: #00c6fb;
 }
 
 .deleteButton {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  font-size: 1.2rem;
-  opacity: 0.6;
-  transition: all 0.3s ease;
+  background: white;
+  border: 2px solid #ef4444;
+  color: #ef4444;
+}
+
+.editButton:hover {
+  background: rgba(0,198,251,0.1);
 }
 
 .deleteButton:hover {
-  opacity: 1;
-  transform: scale(1.1);
-  color: #dc3545;
-}
-
-.planContent {
-  margin-top: 1rem;
-  padding: 1rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  animation: slideDown 0.3s ease-out;
+  background: rgba(239,68,68,0.1);
 }
 
 @keyframes slideDown {
@@ -146,127 +263,174 @@
   }
 }
 
-.emptyState {
-  text-align: center;
-  padding: 3rem;
-  background: white;
-  border-radius: 12px;
-  color: #666;
-}
-
-.emptyIcon {
-  font-size: 3rem;
-  display: block;
-  margin-bottom: 1rem;
-}
-
 @media (max-width: 768px) {
   .hero h1 {
     font-size: 2rem;
   }
 
   .mainSection {
-    padding: 0 1rem 1rem;
+    padding: 0 1rem;
   }
 
-  .planItem {
+  .planActions {
+    flex-direction: column;
+  }
+
+  .contentHeader {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
 
-  .planMeta {
+  .contentActions {
     width: 100%;
-    flex-wrap: wrap;
-    gap: 1rem;
+    flex-direction: column;
   }
-} 
 
-.planActions {
-  display: flex;
-  gap: 0.5rem;
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.editButton {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  font-size: 1.2rem;
-  opacity: 0.6;
-  transition: all 0.3s ease;
-}
-
-.editButton:hover {
-  opacity: 1;
-  transform: scale(1.1);
-  color: #00c6fb;
-}
-
-.editSection {
-  margin-top: 1rem;
-  padding: 1.5rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  animation: slideDown 0.3s ease-out;
+@media (max-width: 1024px) {
+  .detailsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .statsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
 }
 
 .editTextarea {
   width: 100%;
+  min-height: 400px;
   padding: 1rem;
-  border: 2px solid #e4e9f2;
+  border: 2px solid #e9ecef;
   border-radius: 8px;
+  font-family: inherit;
   font-size: 1rem;
-  line-height: 1.5;
+  line-height: 1.6;
+  color: #2c3e50;
+  background: white;
   resize: vertical;
-  min-height: 200px;
-  margin-bottom: 1rem;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .editTextarea:focus {
   outline: none;
   border-color: #00c6fb;
-  box-shadow: 0 0 0 3px rgba(0,198,251,0.2);
-}
-
-.editActions {
-  display: flex;
-  gap: 1rem;
-}
-
-.saveButton, .cancelButton {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  flex: 1;
+  box-shadow: 0 0 0 3px rgba(0,198,251,0.1);
 }
 
 .saveButton {
-  background: linear-gradient(135deg, #00c6fb 0%, #005bea 100%);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #10b981;
+  border: none;
   color: white;
 }
 
 .saveButton:hover {
+  background: #059669;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,198,251,0.3);
+  box-shadow: 0 4px 12px rgba(16,185,129,0.2);
 }
 
 .cancelButton {
-  background: #e4e9f2;
-  color: #666;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  border: 2px solid #64748b;
+  color: #64748b;
 }
 
 .cancelButton:hover {
-  background: #d1d9e6;
+  background: rgba(100,116,139,0.1);
 }
 
-@media (max-width: 768px) {
-  .editActions {
-    flex-direction: column;
-  }
+.planContent pre {
+  white-space: pre-wrap;
+  font-family: 'Courier New', Courier, monospace;
+  margin: 0;
+  color: #2c3e50;
+  line-height: 1.6;
+}
+
+.deleteConfirm {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  z-index: 10;
+}
+
+.deleteConfirm p {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+.deleteActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.confirmDelete {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #ef4444;
+  border: none;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.confirmDelete:hover {
+  background: #dc2626;
+}
+
+.cancelDelete {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  background: white;
+  border: 2px solid #64748b;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.cancelDelete:hover {
+  background: rgba(100, 116, 139, 0.1);
+}
+
+/* Füge einen Overlay-Effekt hinzu, wenn der Lösch-Dialog geöffnet ist */
+.planCard.showDeleteConfirm::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
 } 

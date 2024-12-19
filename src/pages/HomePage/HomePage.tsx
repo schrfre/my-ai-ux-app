@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import styles from './HomePage.module.css';
 import ContentCard from '../../components/ContentCard/ContentCard';
 import { useSettings } from '../../context/SettingsContext';
 import { generateContent } from '../../services/llmService';
+import { useLearning } from '../../context/LearningContext';
+import { calculateWeeks, calculateChapters } from '../../utils/dateCalculations';
 
 const HomePage: React.FC = () => {
   const [topic, setTopic] = useState('');
@@ -12,23 +14,56 @@ const HomePage: React.FC = () => {
   const [confidenceScore, setConfidenceScore] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [learningGoal, setLearningGoal] = useState('');
+  const [timePerDay, setTimePerDay] = useState('');
+  const [daysPerWeek, setDaysPerWeek] = useState('5');
+  const [targetDate, setTargetDate] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const settings = useSettings();
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const { addLearningPlan } = useLearning();
 
   const handleGenerate = async () => {
     if (!topic) return;
     setIsLoading(true);
     setError(null);
 
+    const weeks = calculateWeeks(targetDate);
+    const totalChapters = calculateChapters(weeks, daysPerWeek, timePerDay);
+
+    abortControllerRef.current = new AbortController();
+
     try {
-      const content = await generateContent({ topic, ...settings });
+      const content = await generateContent({ 
+        topic,
+        learningGoal,
+        timePerDay,
+        daysPerWeek,
+        targetDate,
+        ...settings,
+        signal: abortControllerRef.current.signal
+      });
+      
+      addLearningPlan({
+        topic,
+        content,
+        totalChapters,
+        confidenceScore: 85
+      });
+
       setGeneratedContent(content);
       setEditableContent(content);
       setConfidenceScore(85);
-      setIsEditing(true); // Automatisch in den Review-Modus wechseln
+      setIsEditing(true);
     } catch (err) {
-      setError('Fehler bei der Generierung des Lernplans');
+      if ((err as Error).message === 'ABORTED') {
+        setError('Generierung wurde abgebrochen');
+      } else {
+        setError('Fehler bei der Generierung des Lernplans');
+      }
     } finally {
       setIsLoading(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -40,6 +75,31 @@ const HomePage: React.FC = () => {
   const handleCancelEdit = () => {
     setEditableContent(generatedContent);
     setIsEditing(false);
+  };
+
+  const handleAbort = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+  };
+
+  const validateTargetDate = (date: string) => {
+    const selectedDate = new Date(date);
+    const today = new Date();
+    
+    if (selectedDate <= today) {
+      setError('Das Zieldatum muss in der Zukunft liegen');
+      return false;
+    }
+    return true;
+  };
+
+  const handleTargetDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value;
+    if (validateTargetDate(newDate)) {
+      setTargetDate(newDate);
+      setError(null);
+    }
   };
 
   return (
@@ -59,26 +119,94 @@ const HomePage: React.FC = () => {
               placeholder="Geben Sie ein Thema ein, z.B. 'React Hooks' oder 'Machine Learning Grundlagen'"
               className={styles.topicInput}
             />
+            
             <div className={styles.buttonContainer}>
-              <button 
-                className={styles.generateButton}
-                onClick={handleGenerate}
-                disabled={!topic || isLoading}
-              >
-                {isLoading ? (
-                  <div className={styles.loadingSpinner}>
-                    <div className={styles.spinner}></div>
-                    <span>Generiere...</span>
-                  </div>
-                ) : (
-                  <>
-                    <span className={styles.buttonIcon}>🤖</span>
-                    Lernplan erstellen
-                  </>
-                )}
-              </button>
+              {isLoading ? (
+                <button 
+                  className={styles.abortButton}
+                  onClick={handleAbort}
+                >
+                  <span className={styles.buttonIcon}>⚫</span>
+                  Abbrechen
+                </button>
+              ) : (
+                <button 
+                  className={styles.generateButton}
+                  onClick={handleGenerate}
+                  disabled={!topic || isLoading}
+                >
+                  <span className={styles.buttonIcon}>🤖</span>
+                  Lernplan erstellen
+                </button>
+              )}
             </div>
           </div>
+
+          <button 
+            className={styles.advancedToggle}
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            type="button"
+          >
+            {showAdvanced ? '− ' : '+ '}
+            Erweiterte Einstellungen
+          </button>
+
+          {showAdvanced && (
+            <div className={styles.advancedInputs}>
+              <div className={styles.inputGroup}>
+                <label>Lernziel</label>
+                <input
+                  type="text"
+                  value={learningGoal}
+                  onChange={(e) => setLearningGoal(e.target.value)}
+                  placeholder="z.B. 'Prüfung bestehen' oder 'Grundlagen verstehen'"
+                  className={styles.input}
+                />
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label>Lernzeit pro Tag</label>
+                <input
+                  type="number"
+                  value={timePerDay}
+                  onChange={(e) => setTimePerDay(e.target.value)}
+                  placeholder="Stunden, z.B. 2"
+                  min="0.5"
+                  max="12"
+                  step="0.5"
+                  className={styles.input}
+                />
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label>Lerntage pro Woche</label>
+                <input
+                  type="number"
+                  value={daysPerWeek}
+                  onChange={(e) => setDaysPerWeek(e.target.value)}
+                  min="1"
+                  max="7"
+                  className={styles.input}
+                />
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label>Zieldatum</label>
+                <input
+                  type="date"
+                  value={targetDate}
+                  onChange={handleTargetDateChange}
+                  min={new Date().toISOString().split('T')[0]}
+                  className={styles.input}
+                />
+                {targetDate && (
+                  <span className={styles.dateInfo}>
+                    {calculateWeeks(targetDate)} Wochen bis zum Ziel
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className={styles.features}>
             <div className={styles.feature}>

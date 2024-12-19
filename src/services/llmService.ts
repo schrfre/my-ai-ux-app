@@ -1,4 +1,4 @@
-interface LLMRequestParams {
+export interface LLMRequestParams {
   topic: string;
   difficulty: string;
   targetAudience: string;
@@ -10,6 +10,10 @@ interface LLMRequestParams {
   };
   language: string;
   automationLevel: number;
+  learningGoal: string;
+  timePerDay?: string;
+  daysPerWeek?: string;
+  targetDate?: string;
   signal?: AbortSignal;
 }
 
@@ -48,7 +52,11 @@ const createPrompt = (params: LLMRequestParams): string => {
     targetAudience,
     stylePreferences,
     language,
-    automationLevel
+    automationLevel,
+    learningGoal,
+    timePerDay,
+    daysPerWeek,
+    targetDate
   } = params;
 
   const formalityLevel = stylePreferences.formal ? "formal" : "informal";
@@ -84,6 +92,10 @@ const createPrompt = (params: LLMRequestParams): string => {
     Berücksichtige dabei:
     - Schwierigkeitsgrad: ${difficulty}
     - Zielgruppe: ${targetAudience}
+    - Lernziel: ${learningGoal}
+    ${timePerDay ? `- Verfügbare Zeit: ${timePerDay} Stunden pro Tag` : ''}
+    ${daysPerWeek ? `- ${daysPerWeek} Lerntage pro Woche` : ''}
+    ${targetDate ? `- Zieldatum: ${targetDate}` : ''}
     - Stil: ${technicalLevel} und ${formalityLevel}
     - Detailgrad: ${detailLevel}
     ${stylePreferences.examples ? '- Füge praktische Codebeispiele ein' : ''}
