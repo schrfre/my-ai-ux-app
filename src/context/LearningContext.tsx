@@ -2,32 +2,30 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { extractChapters } from '../utils/contentParser';
 
 export interface Chapter {
+  id: string;
   title: string;
   content: string;
   isCompleted: boolean;
+  duration: string;
+  difficulty: string;
+  objectives: string[];
+  nextRepetition?: string;
 }
 
 export interface LearningPlan {
   id: string;
   topic: string;
   content: string;
-  chapters: Chapter[];
+  confidenceScore: number;
   totalChapters: number;
   completedChapters: number;
-  difficulty: number;
-  relevance: number;
-  lastUpdated: Date;
-  confidenceScore: number;
-  settings?: {
-    format: string;
-    style: string;
-    depth: string;
-  };
+  chapters: Chapter[];
+  lastUpdated: string;
 }
 
 interface LearningContextType {
   learningPlans: LearningPlan[];
-  addLearningPlan: (plan: Omit<LearningPlan, 'id' | 'completedChapters' | 'difficulty' | 'relevance' | 'lastUpdated' | 'chapters' | 'settings'>) => void;
+  addLearningPlan: (plan: Omit<LearningPlan, 'id' | 'completedChapters' | 'lastUpdated' | 'chapters'>) => void;
   updateLearningPlan: (id: string, updates: Partial<LearningPlan>) => void;
   deleteLearningPlan: (id: string) => void;
 }
@@ -70,22 +68,15 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('learningPlans', JSON.stringify(learningPlans));
   }, [learningPlans]);
 
-  const addLearningPlan = (plan: Omit<LearningPlan, 'id' | 'completedChapters' | 'difficulty' | 'relevance' | 'lastUpdated' | 'chapters' | 'settings'>) => {
+  const addLearningPlan = (plan: Omit<LearningPlan, 'id' | 'completedChapters' | 'lastUpdated' | 'chapters'>) => {
     const chapters = extractChapters(plan.content);
     const newPlan: LearningPlan = {
       ...plan,
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       chapters,
       completedChapters: 0,
-      difficulty: 3,
-      relevance: 3,
-      lastUpdated: new Date(),
-      totalChapters: chapters.length,
-      settings: {
-        format: 'structured',
-        style: 'detailed',
-        depth: 'intermediate'
-      }
+      lastUpdated: new Date().toISOString(),
+      totalChapters: chapters.length
     };
     setLearningPlans(prev => [...prev, newPlan]);
   };
@@ -94,7 +85,11 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setLearningPlans(plans =>
       plans.map(plan => {
         if (plan.id === id) {
-          const updatedPlan = { ...plan, ...updates, lastUpdated: new Date() };
+          const updatedPlan = { 
+            ...plan, 
+            ...updates, 
+            lastUpdated: new Date().toISOString()
+          };
           if (updates.content) {
             updatedPlan.chapters = extractChapters(updates.content);
             updatedPlan.totalChapters = updatedPlan.chapters.length;

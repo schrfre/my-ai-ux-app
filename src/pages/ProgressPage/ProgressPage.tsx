@@ -1,9 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './ProgressPage.module.css';
 import { useLearning } from '../../context/LearningContext';
+import EmptyState from '../../components/EmptyState/EmptyState';
 
 const ProgressPage: React.FC = () => {
   const { learningPlans, updateLearningPlan } = useLearning();
+  const [activeChapterIndex, setActiveChapterIndex] = useState<{ [planId: string]: number }>({});
+  const [expandedChapters, setExpandedChapters] = useState<{ [key: string]: boolean }>({});
+
+  // Funktion zum Umschalten der Kapitelansicht
+  const toggleChapter = (planId: string, chapterIndex: number) => {
+    const key = `${planId}-${chapterIndex}`;
+    setExpandedChapters(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
 
   const handleChapterComplete = (planId: string, chapterIndex: number) => {
     const plan = learningPlans.find(p => p.id === planId);
@@ -17,116 +29,139 @@ const ProgressPage: React.FC = () => {
         chapters: updatedChapters,
         completedChapters: completedCount
       });
-    }
-  };
 
-  const handleFeedback = (planId: string, type: 'difficulty' | 'relevance', value: number) => {
-    updateLearningPlan(planId, {
-      [type]: value
-    });
+      if (updatedChapters[chapterIndex].isCompleted && chapterIndex < plan.chapters.length - 1) {
+        setActiveChapterIndex(prev => ({
+          ...prev,
+          [planId]: chapterIndex + 1
+        }));
+        
+        // Expandiere das nächste Kapitel automatisch
+        const nextKey = `${planId}-${chapterIndex + 1}`;
+        setExpandedChapters(prev => ({
+          ...prev,
+          [nextKey]: true
+        }));
+
+        setTimeout(() => {
+          const nextChapter = document.getElementById(`chapter-${planId}-${chapterIndex + 1}`);
+          if (nextChapter) {
+            nextChapter.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 300);
+      }
+    }
   };
 
   return (
     <div className={styles.container}>
       <div className={styles.hero}>
-        <h1>Lernfortschritt & Anpassung</h1>
-        <p>Verfolgen Sie Ihren Lernfortschritt und passen Sie Ihre Lernpläne an Ihre Bedürfnisse an</p>
+        <h1>Lernfortschritt</h1>
+        <p>Verfolgen Sie Ihren Lernfortschritt und passen Sie Ihre Lernpläne an</p>
       </div>
 
       <div className={styles.mainSection}>
-        <div className={styles.content}>
-          {learningPlans.length === 0 ? (
-            <div className={styles.emptyState}>
-              <div className={styles.emptyStateIcon}>📚</div>
-              <h2>Keine Lernpläne vorhanden</h2>
-              <p>Sie haben noch keine Lernpläne erstellt.</p>
-              <button 
-                className={styles.createButton}
-                onClick={() => window.location.href = '/'}
-              >
-                <span>+</span> Ersten Lernplan erstellen
-              </button>
-            </div>
-          ) : (
-            learningPlans.map(plan => (
+        {learningPlans.length === 0 ? (
+          <EmptyState
+            title="Keine Lernpläne vorhanden"
+            description="Sie haben noch keine Lernpläne erstellt."
+          />
+        ) : (
+          <div className={styles.content}>
+            {learningPlans.map(plan => (
               <div key={plan.id} className={styles.progressCard}>
                 <div className={styles.progressHeader}>
                   <h2>{plan.topic}</h2>
-                  <span className={styles.lastUpdated}>
-                    Zuletzt aktualisiert: {plan.lastUpdated.toLocaleDateString()}
-                  </span>
-                </div>
-
-                <div className={styles.progressBar}>
-                  <div 
-                    className={styles.progressFill}
-                    style={{ width: `${(plan.completedChapters / plan.totalChapters) * 100}%` }}
-                  />
-                  <span className={styles.progressText}>
-                    {plan.completedChapters} von {plan.totalChapters} Kapiteln abgeschlossen
-                  </span>
-                </div>
-
-                <div className={styles.chapters}>
-                  {plan.chapters.map((chapter, index) => (
-                    <div key={index} className={styles.chapter}>
-                      <div className={styles.chapterHeader}>
-                        <h3>{chapter.title}</h3>
-                        <button
-                          className={`${styles.completeButton} ${chapter.isCompleted ? styles.completed : ''}`}
-                          onClick={() => handleChapterComplete(plan.id, index)}
-                        >
-                          {chapter.isCompleted ? '✓' : 'Abschließen'}
-                        </button>
-                      </div>
-                      <div className={styles.chapterContent}>
-                        <p>{chapter.content}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className={styles.feedbackSection}>
-                  <div className={styles.feedbackItem}>
-                    <label>Schwierigkeit</label>
-                    <div className={styles.ratingButtons}>
-                      {[1, 2, 3, 4, 5].map(rating => (
-                        <button
-                          key={rating}
-                          className={`${styles.ratingButton} ${plan.difficulty === rating ? styles.active : ''}`}
-                          onClick={() => handleFeedback(plan.id, 'difficulty', rating)}
-                        >
-                          {rating}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className={styles.feedbackItem}>
-                    <label>Relevanz</label>
-                    <div className={styles.ratingButtons}>
-                      {[1, 2, 3, 4, 5].map(rating => (
-                        <button
-                          key={rating}
-                          className={`${styles.ratingButton} ${plan.relevance === rating ? styles.active : ''}`}
-                          onClick={() => handleFeedback(plan.id, 'relevance', rating)}
-                        >
-                          {rating}
-                        </button>
-                      ))}
+                  <div className={styles.progressInfo}>
+                    <span className={styles.lastUpdated}>
+                      Zuletzt aktualisiert: {new Date(plan.lastUpdated).toLocaleDateString()}
+                    </span>
+                    <div className={styles.chapterCount}>
+                      <span className={styles.completedCount}>
+                        {plan.completedChapters}/{plan.totalChapters}
+                      </span>
+                      Kapitel abgeschlossen
                     </div>
                   </div>
                 </div>
 
-                <div className={styles.actions}>
-                  <button className={styles.adjustButton}>
-                    Plan anpassen
-                  </button>
+                <div className={styles.chaptersOverview}>
+                  <div className={styles.chaptersList}>
+                    {plan.chapters.map((chapter, index) => (
+                      <div 
+                        key={index}
+                        id={`chapter-${plan.id}-${index}`}
+                        className={`
+                          ${styles.chapter} 
+                          ${chapter.isCompleted ? styles.completed : ''} 
+                          ${activeChapterIndex[plan.id] === index ? styles.active : ''}
+                          ${expandedChapters[`${plan.id}-${index}`] ? styles.expanded : ''}
+                        `}
+                      >
+                        <div 
+                          className={styles.chapterHeader}
+                          onClick={() => toggleChapter(plan.id, index)}
+                        >
+                          <div className={styles.chapterTitle}>
+                            <span className={styles.chapterNumber}>
+                              {chapter.isCompleted ? '✓' : `${index + 1}`}
+                            </span>
+                            <h3>{chapter.title}</h3>
+                            <span className={styles.duration}>{chapter.duration}</span>
+                          </div>
+                          <button
+                            className={styles.expandButton}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleChapter(plan.id, index);
+                            }}
+                          >
+                            {expandedChapters[`${plan.id}-${index}`] ? '▼' : '▶'}
+                          </button>
+                        </div>
+
+                        {expandedChapters[`${plan.id}-${index}`] && (
+                          <div className={styles.chapterContent}>
+                            <div className={styles.objectives}>
+                              <h4>🎯 Lernziele:</h4>
+                              <ul>
+                                {chapter.objectives?.map((objective, i) => (
+                                  <li key={i}>{objective}</li>
+                                ))}
+                              </ul>
+                            </div>
+                            
+                            <div className={styles.chapterDetails}>
+                              <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>Schwierigkeit:</span>
+                                <span className={styles.detailValue}>{chapter.difficulty}</span>
+                              </div>
+                              {chapter.nextRepetition && (
+                                <div className={styles.detailItem}>
+                                  <span className={styles.detailLabel}>Nächste Wiederholung:</span>
+                                  <span className={styles.detailValue}>
+                                    {new Date(chapter.nextRepetition).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            <button
+                              className={styles.completeButton}
+                              onClick={() => handleChapterComplete(plan.id, index)}
+                            >
+                              {chapter.isCompleted ? 'Als unerledigt markieren' : 'Kapitel abschließen'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

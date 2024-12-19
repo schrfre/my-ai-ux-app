@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styles from './HomePage.module.css';
 import ContentCard from '../../components/ContentCard/ContentCard';
 import { useSettings } from '../../context/SettingsContext';
@@ -17,6 +17,8 @@ const HomePage: React.FC = () => {
   const { addLearningPlan } = useLearning();
   const [isStopping, setIsStopping] = useState(false);
   const [streamedContent, setStreamedContent] = useState('');
+  const contentRef = useRef('');
+  const updateTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const defaultSettings = {
     format: 'structured',
@@ -39,11 +41,22 @@ const HomePage: React.FC = () => {
     }, 500);
   };
 
+  const updateContent = (content: string) => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current);
+    }
+
+    contentRef.current = content;
+    updateTimeoutRef.current = setTimeout(() => {
+      setStreamedContent(content);
+    }, 50);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    setStreamedContent('');
+    contentRef.current = '';
 
     try {
       const response = await generateContent({
@@ -58,10 +71,11 @@ const HomePage: React.FC = () => {
           repetitionInterval: settings.repetitionInterval
         },
         onProgress: (content) => {
-          setStreamedContent(content);
+          updateContent(content);
         }
       });
       
+      setStreamedContent(response.content);
       setGeneratedContent(response.content);
       setConfidenceScore(response.confidenceScore);
 
@@ -85,9 +99,21 @@ const HomePage: React.FC = () => {
       }
       console.error('Fehler bei der Generierung:', err);
     } finally {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+      }
       setIsLoading(false);
     }
   };
+
+  // Cleanup beim Unmount
+  useEffect(() => {
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className={styles.container}>
