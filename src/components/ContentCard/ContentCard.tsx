@@ -1,121 +1,71 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './ContentCard.module.css';
-import { marked } from 'marked';
-import { LearningPlan, StylePreferences } from '../../types/LearningPlan';
-import { useSettings } from '../../context/SettingsContext';
-import { generateId } from '../../utils/helpers';
 
 interface ContentCardProps {
   content: string;
   confidenceScore: number;
   topic: string;
-  difficulty?: string;
-  targetAudience?: string;
-  automationLevel?: number;
-  language?: string;
+  settings?: {
+    format?: string;
+    style?: string;
+    depth?: string;
+  };
 }
 
 const ContentCard: React.FC<ContentCardProps> = ({
-  topic,
   content,
   confidenceScore,
-  difficulty,
-  targetAudience,
-  automationLevel,
-  language
+  topic,
+  settings: propSettings
 }) => {
-  const [htmlContent, setHtmlContent] = useState('');
-  const settings = useSettings();
+  const [formattedContent, setFormattedContent] = useState('');
 
-  const effectiveDifficulty = difficulty || settings.difficulty;
-  const effectiveTargetAudience = targetAudience || settings.targetAudience;
-  const effectiveAutomationLevel = automationLevel || settings.automationLevel;
-  const effectiveLanguage = language || settings.language;
+  const settings = propSettings || {
+    format: 'structured',
+    style: 'detailed',
+    depth: 'intermediate'
+  };
 
   useEffect(() => {
-    const parseMarkdown = async () => {
-      const parsed = await marked(content);
-      setHtmlContent(parsed);
-    };
-    parseMarkdown();
+    const formatted = content
+      .split('\n')
+      .map(line => {
+        if (line.startsWith('# ')) {
+          return `<h1>${line.slice(2)}</h1>`;
+        }
+        if (line.startsWith('## ')) {
+          return `<h2>${line.slice(3)}</h2>`;
+        }
+        if (line.startsWith('- ')) {
+          return `<li>${line.slice(2)}</li>`;
+        }
+        if (line.trim() === '') {
+          return '<br>';
+        }
+        return `<p>${line}</p>`;
+      })
+      .join('');
+    setFormattedContent(formatted);
   }, [content]);
-
-  const handleSave = () => {
-    const defaultStylePreferences: StylePreferences = {
-      formal: false,
-      technical: false,
-      examples: true,
-      detailed: true
-    };
-
-    const newPlan: LearningPlan = {
-      id: generateId(),
-      topic,
-      content,
-      confidenceScore,
-      createdAt: new Date(),
-      settings: {
-        difficulty: effectiveDifficulty,
-        targetAudience: effectiveTargetAudience,
-        automationLevel: effectiveAutomationLevel,
-        language: effectiveLanguage,
-        stylePreferences: defaultStylePreferences
-      }
-    };
-
-    const savedPlans = localStorage.getItem('learningPlans');
-    const plans: LearningPlan[] = savedPlans ? JSON.parse(savedPlans) : [];
-    plans.push(newPlan);
-    localStorage.setItem('learningPlans', JSON.stringify(plans));
-
-    alert('Lernplan erfolgreich gespeichert!');
-  };
 
   return (
     <div className={styles.card}>
       <div className={styles.header}>
-        <div className={styles.titleSection}>
-          <h2>{topic}</h2>
-          <div className={styles.confidenceScore}>
-            <span>Confidence Score:</span>
-            <div className={styles.scoreBar}>
-              <div 
-                className={styles.scoreIndicator} 
-                style={{ width: `${confidenceScore}%` }}
-              />
-            </div>
-            <span>{confidenceScore}%</span>
-          </div>
+        <h2>{topic}</h2>
+        <div className={styles.confidenceScore}>
+          <span>KI-Konfidenz: {confidenceScore}%</span>
         </div>
       </div>
-
       <div 
         className={styles.content}
-        dangerouslySetInnerHTML={{ __html: htmlContent }}
+        dangerouslySetInnerHTML={{ __html: formattedContent }}
       />
-
-      <div className={styles.actions}>
-        <button 
-          className={styles.actionButton}
-          onClick={() => navigator.clipboard.writeText(content)}
-        >
-          <span className={styles.icon}>📋</span>
-          Kopieren
-        </button>
-        <button 
-          className={styles.actionButton}
-          onClick={handleSave}
-        >
-          <span className={styles.icon}>💾</span>
-          Speichern
-        </button>
-        <button 
-          className={styles.actionButton}
-          onClick={() => window.print()}
-        >
-          <span className={styles.icon}>🖨️</span>
-          Drucken
-        </button>
+      <div className={styles.footer}>
+        <div className={styles.settings}>
+          <span>Format: {settings.format || 'Standard'}</span>
+          <span>Stil: {settings.style || 'Normal'}</span>
+          <span>Tiefe: {settings.depth || 'Mittel'}</span>
+        </div>
       </div>
     </div>
   );

@@ -1,65 +1,71 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export interface StylePreference {
-  formal: boolean;
-  technical: boolean;
-  examples: boolean;
-  detailed: boolean;
+interface ExplainabilitySettings {
+  stylePreferences: {
+    format: string;
+    style: string;
+    depth: string;
+  };
 }
 
-interface SettingsContextType {
-  difficulty: string;
-  setDifficulty: (value: string) => void;
-  targetAudience: string;
-  setTargetAudience: (value: string) => void;
-  stylePreferences: StylePreference;
-  setStylePreferences: (value: StylePreference | ((prev: StylePreference) => StylePreference)) => void;
+interface Settings {
+  targetDate: string;
+  daysPerWeek: string;
+  timePerDay: string;
+  explainability: ExplainabilitySettings;
+  automation: string;
   language: string;
-  setLanguage: (value: string) => void;
-  automationLevel: number;
-  setAutomationLevel: (value: number) => void;
+  includeExercises: string;
+  repetitionInterval: string;
+}
+
+const defaultSettings: Settings = {
+  targetDate: '',
+  daysPerWeek: '3',
+  timePerDay: '1',
+  explainability: {
+    stylePreferences: {
+      format: 'structured',
+      style: 'detailed',
+      depth: 'intermediate'
+    }
+  },
+  automation: 'medium',
+  language: 'de',
+  includeExercises: 'few',
+  repetitionInterval: 'weekly'
+};
+
+interface SettingsContextType {
+  settings: Settings;
+  updateSettings: (newSettings: Partial<Settings>) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Lade gespeicherte Einstellungen beim Start
-  const loadSavedSettings = () => {
-    const savedSettings = localStorage.getItem('aiuxSettings');
+  const [settings, setSettings] = useState<Settings>(() => {
+    const savedSettings = localStorage.getItem('settings');
     if (savedSettings) {
-      return JSON.parse(savedSettings);
+      try {
+        return { ...defaultSettings, ...JSON.parse(savedSettings) };
+      } catch {
+        return defaultSettings;
+      }
     }
-    return null;
+    return defaultSettings;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('settings', JSON.stringify(settings));
+  }, [settings]);
+
+  const updateSettings = (newSettings: Partial<Settings>) => {
+    setSettings(prev => ({ ...prev, ...newSettings }));
   };
 
-  const savedSettings = loadSavedSettings();
-
-  const [difficulty, setDifficulty] = useState(savedSettings?.difficulty || 'medium');
-  const [targetAudience, setTargetAudience] = useState(savedSettings?.targetAudience || '');
-  const [stylePreferences, setStylePreferences] = useState<StylePreference>(
-    savedSettings?.stylePreferences || {
-      formal: true,
-      technical: true,
-      examples: true,
-      detailed: false
-    }
-  );
-  const [language, setLanguage] = useState(savedSettings?.language || 'deutsch');
-  const [automationLevel, setAutomationLevel] = useState(savedSettings?.automationLevel || 50);
-
   return (
-    <SettingsContext.Provider value={{
-      difficulty,
-      setDifficulty,
-      targetAudience,
-      setTargetAudience,
-      stylePreferences,
-      setStylePreferences,
-      language,
-      setLanguage,
-      automationLevel,
-      setAutomationLevel
-    }}>
+    <SettingsContext.Provider value={{ settings, updateSettings }}>
       {children}
     </SettingsContext.Provider>
   );

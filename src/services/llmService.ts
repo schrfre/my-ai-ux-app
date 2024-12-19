@@ -1,26 +1,56 @@
 export interface LLMRequestParams {
   topic: string;
-  difficulty: string;
-  targetAudience: string;
-  stylePreferences: {
-    formal: boolean;
-    technical: boolean;
-    examples: boolean;
-    detailed: boolean;
+  settings?: {
+    format?: string;
+    style?: string;
+    depth?: string;
+    automation?: string;
+    language?: string;
+    includeExercises?: string;
+    repetitionInterval?: string;
   };
-  language: string;
-  automationLevel: number;
-  learningGoal: string;
-  timePerDay?: string;
-  daysPerWeek?: string;
-  targetDate?: string;
-  signal?: AbortSignal;
+  onProgress?: (content: string) => void;
 }
 
-export const generateContent = async (params: LLMRequestParams): Promise<string> => {
-  const prompt = createPrompt(params);
-  
+export interface GenerateResponse {
+  content: string;
+  confidenceScore: number;
+}
+
+let abortController: AbortController | null = null;
+
+export const generateContent = async (params: LLMRequestParams): Promise<GenerateResponse> => {
   try {
+    abortController = new AbortController();
+
+    const prompt = `Erstelle einen strukturierten Lernplan für das Thema "${params.topic}".
+    
+Format: ${params.settings?.format || 'structured'}
+Stil: ${params.settings?.style || 'detailed'}
+Komplexität: ${params.settings?.depth || 'intermediate'}
+Sprache: ${params.settings?.language || 'de'}
+Übungsaufgaben: ${params.settings?.includeExercises || 'few'}
+Wiederholungsintervall: ${params.settings?.repetitionInterval || 'weekly'}
+Automatisierungsgrad: ${params.settings?.automation || 'medium'}
+
+Der Lernplan sollte:
+- Eine klare Kapitelstruktur haben
+- Lernziele definieren
+- Wichtige Konzepte erklären
+${params.settings?.includeExercises !== 'none' ? '- Praktische Übungen enthalten' : ''}
+- Fortschrittsmessung ermöglichen
+${params.settings?.repetitionInterval !== 'none' ? '- Wiederholungseinheiten einplanen' : ''}
+
+${params.settings?.automation === 'high' ? 'Erstelle einen vollständig ausgearbeiteten Plan.' : 
+  params.settings?.automation === 'medium' ? 'Erstelle einen ausgewogenen Plan mit Raum für Anpassungen.' :
+  'Erstelle einen Grundgerüst-Plan mit viel Raum für manuelle Anpassungen.'}
+
+${params.settings?.language === 'simple' ? 'Verwende einfache und klare Sprache.' : 
+  params.settings?.language === 'en' ? 'Write the learning plan in English.' :
+  'Verwende normales Deutsch.'}
+
+Bitte strukturiere den Plan in Markdown-Format mit Kapiteln und Unterpunkten.`;
+
     const response = await fetch('http://localhost:11434/api/generate', {
       method: 'POST',
       headers: {
@@ -29,85 +59,61 @@ export const generateContent = async (params: LLMRequestParams): Promise<string>
       body: JSON.stringify({
         model: "llama3:latest",
         prompt: prompt,
-        stream: false
+        stream: true
       }),
-      signal: params.signal
+      signal: abortController.signal
     });
 
-    const data = await response.json();
-    return data.response;
-  } catch (error) {
-    if ((error as Error).name === 'AbortError') {
-      throw new Error('ABORTED');
+    if (!response.ok) {
+      throw new Error('Fehler bei der Verbindung zum Sprachmodell');
     }
-    console.error('LLM Error:', error);
-    throw new Error('Fehler bei der Generierung des Inhalts');
+
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error('Stream konnte nicht gelesen werden');
+
+    let fullContent = '';
+    let decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      try {
+        const jsonChunk = JSON.parse(chunk);
+        if (jsonChunk.response) {
+          fullContent += jsonChunk.response;
+          if (params.onProgress) {
+            params.onProgress(fullContent);
+          }
+        }
+      } catch (e) {
+        console.error('Fehler beim Parsen des Chunks:', e);
+      }
+    }
+
+    const confidenceScore = Math.min(
+      Math.floor((fullContent.length / 1000) * 100), 
+      95
+    );
+
+    return {
+      content: fullContent,
+      confidenceScore: confidenceScore
+    };
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Generierung wurde abgebrochen');
+    }
+    console.error('Fehler bei der Content-Generierung:', error);
+    throw new Error('Fehler bei der Content-Generierung');
+  } finally {
+    abortController = null;
   }
 };
 
-const createPrompt = (params: LLMRequestParams): string => {
-  const {
-    topic,
-    difficulty,
-    targetAudience,
-    stylePreferences,
-    language,
-    automationLevel,
-    learningGoal,
-    timePerDay,
-    daysPerWeek,
-    targetDate
-  } = params;
-
-  const formalityLevel = stylePreferences.formal ? "formal" : "informal";
-  const technicalLevel = stylePreferences.technical ? "technisch detailliert" : "allgemein verständlich";
-  const detailLevel = stylePreferences.detailed ? "ausführlich" : "prägnant";
-  
-  let automationPrompt = "";
-  if (automationLevel <= 25) {
-    automationPrompt = `
-      Erstelle eine grobe Gliederung für einen Lernplan zum Thema "${topic}".
-      Gib nur die Hauptpunkte an, die der Nutzer selbst ausarbeiten kann.
-      Füge Vorschläge für Ressourcen und Lernmaterialien hinzu.
-    `;
-  } else if (automationLevel <= 75) {
-    automationPrompt = `
-      Erstelle einen teilweise ausgearbeiteten Lernplan zum Thema "${topic}".
-      Gib die Hauptpunkte mit kurzen Erklärungen an.
-      Markiere Stellen, die der Nutzer noch selbst ausarbeiten oder anpassen sollte.
-      Füge konkrete Ressourcen, Übungen und Lernmaterialien hinzu.
-    `;
-  } else {
-    automationPrompt = `
-      Erstelle einen vollständig ausgearbeiteten Lernplan zum Thema "${topic}".
-      Gib detaillierte Erklärungen zu jedem Lernschritt.
-      Füge konkrete Übungen, Beispiele und Praxisaufgaben hinzu.
-      Stelle einen kompletten Zeitplan mit Meilensteinen zur Verfügung.
-    `;
+export const stopGeneration = () => {
+  if (abortController) {
+    abortController.abort();
   }
-  
-  return `
-    ${automationPrompt}
-    
-    Berücksichtige dabei:
-    - Schwierigkeitsgrad: ${difficulty}
-    - Zielgruppe: ${targetAudience}
-    - Lernziel: ${learningGoal}
-    ${timePerDay ? `- Verfügbare Zeit: ${timePerDay} Stunden pro Tag` : ''}
-    ${daysPerWeek ? `- ${daysPerWeek} Lerntage pro Woche` : ''}
-    ${targetDate ? `- Zieldatum: ${targetDate}` : ''}
-    - Stil: ${technicalLevel} und ${formalityLevel}
-    - Detailgrad: ${detailLevel}
-    ${stylePreferences.examples ? '- Füge praktische Codebeispiele ein' : ''}
-    
-    Strukturiere den Lernplan in folgende Abschnitte:
-    1. Überblick und Lernziele
-    2. Voraussetzungen
-    3. Lernschritte/Curriculum
-    4. Ressourcen und Materialien
-    5. Übungen und Praxisaufgaben
-    6. Erfolgskontrolle
-    
-    Sprache: ${language}
-  `.trim();
 }; 
