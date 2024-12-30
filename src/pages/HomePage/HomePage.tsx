@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { generateContent, stopGeneration } from '../../services/llmService';
-import { StreamingContent } from '../../components/StreamingContent';
 import { useSettings } from '../../context/SettingsContext';
 import { useLearning } from '../../context/LearningContext';
 import { calculateWeeks, calculateChapters } from '../../utils/dateCalculations';
 import styles from './HomePage.module.css';
+import { LearningPlanDisplay } from '../../components/LearningPlanDisplay/LearningPlanDisplay';
 
 export const HomePage: React.FC = () => {
   const { settings, updateSettings } = useSettings();
@@ -206,7 +206,9 @@ export const HomePage: React.FC = () => {
 
         {streamContent && (
           <div className={styles.resultSection}>
-            <StreamingContent content={streamContent} />
+            <div className={styles.resultWrapper}>
+              <LearningPlanDisplay content={streamContent} />
+            </div>
           </div>
         )}
       </div>
