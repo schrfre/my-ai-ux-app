@@ -23,8 +23,6 @@ export const generateContent = async (params: LLMRequestParams): Promise<Generat
   try {
     abortController = new AbortController();
     let accumulatedContent = '';
-    let lastUpdateTime = Date.now();
-    const UPDATE_INTERVAL = 100; // Minimale Zeit zwischen Updates in ms
 
     const prompt = `Erstelle einen strukturierten Lernplan für das Thema "${params.topic}".
 
@@ -137,19 +135,45 @@ Beginne direkt mit dem formatierten Lernplan.`;
 
     let decoder = new TextDecoder();
     let buffer = '';
+    let currentWord = '';
+    let lastChar = '';
 
     const processBuffer = () => {
-      // Verarbeite nur vollständige Markdown-Sektionen
-      const sections = buffer.split('\n\n');
-      if (sections.length > 1) {
-        // Behalte den letzten möglicherweise unvollständigen Abschnitt
-        const completeContent = sections.slice(0, -1).join('\n\n');
-        buffer = sections[sections.length - 1];
-
-        accumulatedContent += completeContent + '\n\n';
-        return true;
+      let updatedContent = false;
+      
+      for (let i = 0; i < buffer.length; i++) {
+        const char = buffer[i];
+        
+        // Wortende erkennen (Leerzeichen, Zeilenumbruch oder Satzzeichen)
+        if (char === ' ' || char === '\n' || /[.,!?:]/.test(char)) {
+          if (currentWord) {
+            // Füge das Wort und das Trennzeichen zum Gesamtinhalt hinzu
+            accumulatedContent += currentWord + char;
+            if (params.onProgress) {
+              params.onProgress(accumulatedContent);
+            }
+            currentWord = '';
+            updatedContent = true;
+          } else if (char === '\n' && lastChar === '\n') {
+            // Behandle Absätze
+            accumulatedContent += char;
+            if (params.onProgress) {
+              params.onProgress(accumulatedContent);
+            }
+            updatedContent = true;
+          }
+        } else {
+          currentWord += char;
+        }
+        
+        lastChar = char;
       }
-      return false;
+      
+      // Buffer zurücksetzen, aber unvollständiges Wort behalten
+      buffer = currentWord;
+      currentWord = '';
+      
+      return updatedContent;
     };
 
     while (true) {
@@ -162,13 +186,8 @@ Beginne direkt mit dem formatierten Lernplan.`;
         if (jsonChunk.response) {
           buffer += jsonChunk.response;
           
-          const now = Date.now();
-          if (now - lastUpdateTime >= UPDATE_INTERVAL && processBuffer()) {
-            if (params.onProgress) {
-              params.onProgress(accumulatedContent);
-            }
-            lastUpdateTime = now;
-          }
+          // Verarbeite den Buffer sofort für flüssigeres Streaming
+          processBuffer();
         }
       } catch (e) {
         console.error('Fehler beim Parsen des Chunks:', e);
@@ -185,13 +204,10 @@ Beginne direkt mit dem formatierten Lernplan.`;
 
     // Bereinige das finale Ergebnis
     const cleanedContent = accumulatedContent
-      .replace(/\n{3,}/g, '\n\n') // Entferne übermäßige Leerzeilen
+      .replace(/\n{3,}/g, '\n\n')
       .trim();
 
-    const confidenceScore = Math.min(
-      Math.floor((cleanedContent.length / 1000) * 100), 
-      95
-    );
+    const confidenceScore = calculateConfidenceScore(cleanedContent);
 
     return {
       content: cleanedContent,
@@ -212,4 +228,24 @@ export const stopGeneration = () => {
   if (abortController) {
     abortController.abort();
   }
+};
+
+const calculateConfidenceScore = (content: string): number => {
+  // Basis-Score
+  let score = 70;
+
+  // Überprüfe Struktur und Vollständigkeit
+  if (content.includes('## 🎯 Lernziele')) score += 5;
+  if (content.includes('## 📋 Überblick')) score += 5;
+  if (content.includes('## 📖 Kapitelübersicht')) score += 5;
+  if (content.includes('## ⏱️ Zeitplan')) score += 5;
+  if (content.includes('## 📈 Erfolgsmessung')) score += 5;
+
+  // Überprüfe Detailtiefe
+  const wordCount = content.split(/\s+/).length;
+  if (wordCount > 500) score += 5;
+  if (wordCount > 1000) score += 5;
+
+  // Maximaler Score ist 95
+  return Math.min(score, 95);
 }; 

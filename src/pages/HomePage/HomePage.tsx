@@ -1,24 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
-import styles from './HomePage.module.css';
-import ContentCard from '../../components/ContentCard/ContentCard';
-import { useSettings } from '../../context/SettingsContext';
+import React, { useState } from 'react';
 import { generateContent, stopGeneration } from '../../services/llmService';
+import { StreamingContent } from '../../components/StreamingContent';
+import { useSettings } from '../../context/SettingsContext';
 import { useLearning } from '../../context/LearningContext';
 import { calculateWeeks, calculateChapters } from '../../utils/dateCalculations';
+import styles from './HomePage.module.css';
 
-const HomePage: React.FC = () => {
+export const HomePage: React.FC = () => {
   const { settings, updateSettings } = useSettings();
   const [topic, setTopic] = useState('');
-  const [generatedContent, setGeneratedContent] = useState('');
-  const [confidenceScore, setConfidenceScore] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [streamContent, setStreamContent] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const { addLearningPlan } = useLearning();
   const [isStopping, setIsStopping] = useState(false);
-  const [streamedContent, setStreamedContent] = useState('');
-  const contentRef = useRef('');
-  const updateTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const defaultSettings = {
     format: 'structured',
@@ -26,37 +22,22 @@ const HomePage: React.FC = () => {
     depth: 'intermediate'
   };
 
-  const handleTimeSettingsChange = (field: string, value: string) => {
-    updateSettings({
-      [field]: value
-    });
-  };
-
   const handleStopGeneration = () => {
     setIsStopping(true);
     stopGeneration();
     setTimeout(() => {
-      setIsLoading(false);
+      setIsGenerating(false);
       setIsStopping(false);
     }, 500);
   };
 
-  const updateContent = (content: string) => {
-    if (updateTimeoutRef.current) {
-      clearTimeout(updateTimeoutRef.current);
-    }
-
-    contentRef.current = content;
-    updateTimeoutRef.current = setTimeout(() => {
-      setStreamedContent(content);
-    }, 50);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    if (!topic.trim()) return;
+
+    setIsGenerating(true);
     setError(null);
-    contentRef.current = '';
+    setStreamContent(''); // Reset content
 
     try {
       const response = await generateContent({
@@ -71,13 +52,9 @@ const HomePage: React.FC = () => {
           repetitionInterval: settings.repetitionInterval
         },
         onProgress: (content) => {
-          updateContent(content);
+          setStreamContent(content);
         }
       });
-      
-      setStreamedContent(response.content);
-      setGeneratedContent(response.content);
-      setConfidenceScore(response.confidenceScore);
 
       if (response.content) {
         addLearningPlan({
@@ -97,23 +74,10 @@ const HomePage: React.FC = () => {
       } else {
         setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
       }
-      console.error('Fehler bei der Generierung:', err);
     } finally {
-      if (updateTimeoutRef.current) {
-        clearTimeout(updateTimeoutRef.current);
-      }
-      setIsLoading(false);
+      setIsGenerating(false);
     }
   };
-
-  // Cleanup beim Unmount
-  useEffect(() => {
-    return () => {
-      if (updateTimeoutRef.current) {
-        clearTimeout(updateTimeoutRef.current);
-      }
-    };
-  }, []);
 
   return (
     <div className={styles.container}>
@@ -128,114 +92,110 @@ const HomePage: React.FC = () => {
             <span className={styles.featureIcon}>🎯</span>
             <div>
               <h3>Personalisiert</h3>
-              <p>Auf Ihre Bedürfnisse zugeschnitten</p>
+              <p>Maßgeschneiderte Lernpläne für Ihre individuellen Ziele</p>
             </div>
           </div>
           <div className={styles.feature}>
             <span className={styles.featureIcon}>⚡</span>
             <div>
               <h3>Effizient</h3>
-              <p>Optimierte Lernpläne in Sekunden</p>
+              <p>Optimierte Lernpläne in Echtzeit generiert</p>
             </div>
           </div>
           <div className={styles.feature}>
             <span className={styles.featureIcon}>🤖</span>
             <div>
               <h3>KI-gestützt</h3>
-              <p>Modernste Technologie</p>
+              <p>Unterstützt durch modernste KI-Technologie</p>
             </div>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className={styles.inputSection}>
-          <div className={styles.inputWrapper}>
-            <input
-              type="text"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              placeholder="Geben Sie Ihr Lernthema ein..."
-              className={styles.topicInput}
-            />
-            <button 
-              type="submit" 
-              className={`${styles.generateButton} ${isLoading ? styles.stopButton : ''}`}
-              onClick={isLoading ? handleStopGeneration : undefined}
-              disabled={(!isLoading && !topic.trim()) || isStopping}
-            >
-              {isLoading ? (
-                <>
-                  <span className={styles.buttonIcon}>
-                    {isStopping ? '⏳' : '⏹️'}
-                  </span>
-                  {isStopping ? 'Wird gestoppt...' : 'Generierung stoppen'}
-                </>
-              ) : (
-                <>
-                  <span className={styles.buttonIcon}>✨</span>
-                  Lernplan erstellen
-                </>
-              )}
-            </button>
-          </div>
-
-          <button 
-            type="button"
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className={styles.advancedToggle}
-          >
-            {showAdvanced ? '▼ Weniger Optionen' : '▶ Erweiterte Optionen'}
-          </button>
-
-          {showAdvanced && (
-            <div className={styles.advancedInputs}>
-              <div className={styles.inputGroup}>
-                <label>Zieldatum</label>
-                <input
-                  type="date"
-                  value={settings.targetDate}
-                  onChange={(e) => handleTimeSettingsChange('targetDate', e.target.value)}
-                  className={styles.input}
-                />
-                <span className={styles.dateInfo}>
-                  Bis wann möchten Sie das Thema beherrschen?
-                </span>
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label>Lerntage pro Woche</label>
-                <select
-                  value={settings.daysPerWeek}
-                  onChange={(e) => handleTimeSettingsChange('daysPerWeek', e.target.value)}
-                  className={styles.input}
-                >
-                  <option value="1">1 Tag</option>
-                  <option value="2">2 Tage</option>
-                  <option value="3">3 Tage</option>
-                  <option value="4">4 Tage</option>
-                  <option value="5">5 Tage</option>
-                  <option value="6">6 Tage</option>
-                  <option value="7">7 Tage</option>
-                </select>
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label>Lernzeit pro Tag</label>
-                <select
-                  value={settings.timePerDay}
-                  onChange={(e) => handleTimeSettingsChange('timePerDay', e.target.value)}
-                  className={styles.input}
-                >
-                  <option value="0.5">30 Minuten</option>
-                  <option value="1">1 Stunde</option>
-                  <option value="1.5">1,5 Stunden</option>
-                  <option value="2">2 Stunden</option>
-                  <option value="3">3 Stunden</option>
-                  <option value="4">4 Stunden</option>
-                </select>
-              </div>
+        <div className={styles.inputSection}>
+          <form onSubmit={handleSubmit}>
+            <div className={styles.searchBar}>
+              <input
+                type="text"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="Geben Sie Ihr Lernthema ein..."
+                className={styles.searchInput}
+                disabled={isGenerating}
+              />
+              <button 
+                type="submit" 
+                className={`${styles.generateButton} ${isGenerating ? styles.stopButton : ''}`}
+                onClick={isGenerating ? handleStopGeneration : undefined}
+                disabled={(!isGenerating && !topic.trim()) || isStopping}
+              >
+                {isGenerating ? (
+                  <>
+                    <span className={styles.buttonIcon}>
+                      {isStopping ? '⏳' : '⏹️'}
+                    </span>
+                    {isStopping ? 'Wird gestoppt...' : 'Generierung stoppen'}
+                  </>
+                ) : (
+                  <>
+                    <span className={styles.buttonIcon}>✨</span>
+                    Lernplan erstellen
+                  </>
+                )}
+              </button>
             </div>
-          )}
-        </form>
+
+            <button 
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className={styles.advancedToggle}
+            >
+              {showAdvanced ? '▼ Weniger Optionen' : '▶ Erweiterte Optionen'}
+            </button>
+
+            {showAdvanced && (
+              <div className={styles.advancedInputs}>
+                <div className={styles.inputGroup}>
+                  <label>Zieldatum</label>
+                  <input
+                    type="date"
+                    value={settings.targetDate}
+                    onChange={(e) => updateSettings({ targetDate: e.target.value })}
+                    className={styles.input}
+                  />
+                </div>
+
+                <div className={styles.inputGroup}>
+                  <label>Lerntage pro Woche</label>
+                  <select
+                    value={settings.daysPerWeek}
+                    onChange={(e) => updateSettings({ daysPerWeek: e.target.value })}
+                    className={styles.input}
+                  >
+                    {[1,2,3,4,5,6,7].map(day => (
+                      <option key={day} value={day}>{day} {day === 1 ? 'Tag' : 'Tage'}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className={styles.inputGroup}>
+                  <label>Lernzeit pro Tag</label>
+                  <select
+                    value={settings.timePerDay}
+                    onChange={(e) => updateSettings({ timePerDay: e.target.value })}
+                    className={styles.input}
+                  >
+                    <option value="0.5">30 Minuten</option>
+                    <option value="1">1 Stunde</option>
+                    <option value="1.5">1,5 Stunden</option>
+                    <option value="2">2 Stunden</option>
+                    <option value="3">3 Stunden</option>
+                    <option value="4">4 Stunden</option>
+                  </select>
+                </div>
+              </div>
+            )}
+          </form>
+        </div>
 
         {error && (
           <div className={styles.error}>
@@ -244,19 +204,12 @@ const HomePage: React.FC = () => {
           </div>
         )}
 
-        {(streamedContent || generatedContent) && (
+        {streamContent && (
           <div className={styles.resultSection}>
-            <ContentCard
-              topic={topic}
-              content={streamedContent || generatedContent}
-              confidenceScore={confidenceScore}
-              settings={defaultSettings}
-            />
+            <StreamingContent content={streamContent} />
           </div>
         )}
       </div>
     </div>
   );
-};
-
-export default HomePage; 
+}; 

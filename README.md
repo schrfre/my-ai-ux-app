@@ -1,3 +1,7 @@
+# LLM-Lernplaner-Generator
+Im Hintergrund wird ein LLM verwendet um den Lernplan zu erstellen. Für die Erstellung wird Ollama verwendet.
+Ollama muss installiert sein und der LLM muss aufgesetzt werden. Anschließend muss in der Datei `src/services/llmService.ts` die URL des LLM angepasst werden.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
