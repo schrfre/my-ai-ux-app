@@ -1,56 +1,66 @@
-# LLM-Lernplaner-Generator
-Im Hintergrund wird ein LLM verwendet um den Lernplan zu erstellen. Für die Erstellung wird Ollama verwendet.
-Ollama muss installiert sein und das LLM muss aufgesetzt werden. Anschließend muss in der Datei `src/services/llmService.ts` die URL des LLM angepasst werden.
+# LLM-Lernplaner-Generator -- My AI UX App
 
-Empfohlen wird die Verwendung von dem Modell `llama3:latest` empfohlen.
+## Übersicht
+**My AI UX App** ist eine Anwendung zur Evaluierung und Gestaltung von UX-Frameworks für generative KI-Systeme. Sie dient als Forschungsprojekt zur Analyse und Optimierung der Nutzererfahrung im Kontext von Human-Centered AI (HCAI) und E-Learning.
+
+## Funktionen
+- **Benutzerfreundliches UI/UX**: Intuitive Benutzeroberfläche zur einfachen Interaktion mit KI-Modellen.
+- **Generative KI-Integration**: Nutzung von LLMs zur Textgenerierung und Interaktion.
+- **Evaluierungstools**: Methoden zur Messung der UX-Qualität und Nutzerzufriedenheit.
+- **Personalisierte Empfehlungen**: Adaptive KI-Modelle für personalisierte Vorschläge.
+- **Datenanalyse & Visualisierung**: Werkzeuge zur Interpretation und Optimierung von UX-Daten.
+
+## Installation
+### Voraussetzungen
+- Node.js (empfohlen: v18+)
+- npm oder yarn
+- Python (optional für bestimmte Analysen)
+- OpenAI API Key oder kompatibles LLM
+
+### Setup
+1. Repository klonen:
+   ```sh
+   git clone https://github.com/schrfre/my-ai-ux-app.git
+   cd my-ai-ux-app
+   ```
+2. Abhängigkeiten installieren:
+   ```sh
+   npm install
+   ```
+3. Anwendung starten:
+   ```sh
+   npm run dev
+   ```
+4. LLM-Backend starten:
+   - Im Hintergrund wird ein LLM verwendet um den Lernplan zu erstellen. Für die Erstellung wird Ollama verwendet. Ollama muss installiert sein und das LLM muss aufgesetzt werden. Anschließend muss in der Datei `src/services/llmService.ts` die URL des LLM angepasst werden. Empfohlen wird die Verwendung von dem Modell `llama3:latest` empfohlen.
 - https://ollama.com/ -- https://github.com/ollama/ollama
 - https://www.llama.com/
 
-In Ollama kann das Modell direkt installiert werden.
+   - Falls OpenAI API genutzt wird, setze die Umgebungsvariable:
+     ```sh
+     export OPENAI_API_KEY='your-api-key'
+     ```
+   - Falls ein lokales LLM mit Ollama genutzt wird, stelle sicher, dass der entsprechende Server läuft und die API unter der richtigen Adresse erreichbar ist.
 
-# Getting Started with Create React App
+## Nutzung
+1. Öffne die Anwendung im Browser unter `http://localhost:3000`
+2. Erkunde die verschiedenen Funktionen und sammle UX-Daten
+3. Analysiere die Ergebnisse zur Optimierung der Nutzererfahrung
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Mitwirken
+Pull Requests sind willkommen! Bitte erstelle ein Issue für größere Änderungen.
 
-## Available Scripts
+## Lizenz
+MIT License – siehe `LICENSE` für weitere Details.
 
-In the project directory, you can run:
+## Zitieren der Arbeit
 
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+```
+@online{github_repo,
+  author = {Schröder, Frederik},
+  title = {my-ai-ux-app},
+  year = {2025},
+  url = {https://github.com/schrfre/my-ai-ux-app},
+  urldate = {aktuelles Datum eintragen}
+}
+```
